@@ -279,11 +279,11 @@ var planeObject = {
 	funcUpdateLines: function() {
 			if (this.line) {
 				var path = this.line.getPath();
-				path.setOptions({strokeColor: this.funcAltColor(this.altitude)});
+				path.setOptions({strokeColor: this.funcAltColorRainbow(this.altitude)});
 				path.push(new google.maps.LatLng(this.latitude, this.longitude));
 			} else {
 				this.line = new google.maps.Polyline({
-					strokeColor: this.funcAltColor(this.altitude),
+					strokeColor: this.funcAltColorRainbow(this.altitude),
 					strokeOpacity: 1.0,
 					strokeWeight: 3,
 					map: GoogleMap,
