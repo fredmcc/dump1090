@@ -172,7 +172,7 @@ function initialize() {
 	GoogleMap = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
 
 	var ctaLayer = new google.maps.KmlLayer({
-          url: 'https://raw.githubusercontent.com/fredmcc/dump1090/overlay/public_html/overlay/SV.kml',
+          url: 'https://raw.githubusercontent.com/fredmcc/dump1090/overlay/public_html/overlay/overlay.kml',
           map: GoogleMap
         });
 
