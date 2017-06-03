@@ -3,7 +3,7 @@
 <GroundOverlay>
 	<name>Untitled Image Overlay</name>
 	<Icon>
-		<href>https://raw.githubusercontent.com/fredmcc/cleanflight/master/docs/Wiring/Crius%20CO-16%20OLED%20diagram.png</href>
+		<href>https://raw.githubusercontent.com/fredmcc/dump1090/overlay/public_html/overlay/SV.JPG</href>
 		<viewBoundScale>0.75</viewBoundScale>
 	</Icon>
 	<LatLonBox>

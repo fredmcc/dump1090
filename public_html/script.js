@@ -173,6 +173,11 @@ function initialize() {
 
 	GoogleMap = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
 
+	var ctaLayer = new google.maps.KmlLayer({
+          url: 'https://raw.githubusercontent.com/fredmcc/dump1090/overlay/public_html/overlay/SV.kml',
+          map: GoogleMap
+        });
+
 	//Define OSM map type pointing at the OpenStreetMap tile server
 	GoogleMap.mapTypes.set("OSM", new google.maps.ImageMapType({
 		getTileUrl: function(coord, zoom) {
