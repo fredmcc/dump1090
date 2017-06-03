@@ -163,11 +163,9 @@ function initialize() {
 		zoom: ZoomLvl,
 		mapTypeId: google.maps.MapTypeId.TERRAIN,
 		mapTypeControl: true,
-		streetViewControl: false,
-		mapTypeControlOptions: {
+		streetViewControl: false,mapTypeControlOptions: {
 			mapTypeIds: mapTypeIds,
-			position: google.maps.ControlPosition.TOP_LEFT,
-			style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
+			position: google.maps.ControlPosition.TOP_LEFT,style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
 		}
 	};
 
