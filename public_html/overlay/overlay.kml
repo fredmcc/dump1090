@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+<GroundOverlay>
+	<name>Untitled Image Overlay</name>
+	<Icon>
+		<href>https://raw.githubusercontent.com/fredmcc/dump1090/overlay/public_html/overlay/overlay.JPG</href>
+		<viewBoundScale>0.75</viewBoundScale>
+	</Icon>
+	<LatLonBox>
+		<north>50.5</north>
+		<south>49.50000000000001</south>
+		<east>10</east>
+		<west>7.5</west>
+	</LatLonBox>
+</GroundOverlay>
+</kml>
