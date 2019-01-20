@@ -11,8 +11,10 @@ Metric = false; // true or false
 
 // -- Map settings ----------------------------------------
 // The Latitude and Longitude in decimal format
-CONST_CENTERLAT = 50.098;
-CONST_CENTERLON = 8.26;
+//CONST_CENTERLAT = 50.098;
+//CONST_CENTERLON = 8.26;
+CONST_CENTERLAT = 42.69;
+CONST_CENTERLON = -83.109;
 // The google maps zoom level, 0 - 16, lower is further out
 CONST_ZOOMLVL   = 8;
 
@@ -25,8 +27,8 @@ StaleColor = "rgb(190, 190, 190)";
 // -- Site Settings ---------------------------------------
 SiteShow    = true; // true or false
 // The Latitude and Longitude in decimal format
-SiteLat     = 50.098;
-SiteLon     = 8.26;
+SiteLat     = 42.69;
+SiteLon     = -83.109;
 ShowRange   = false;
 
 SiteCircles = true; // true or false (Only shown if SiteShow is true)
