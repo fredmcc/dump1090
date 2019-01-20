@@ -7,10 +7,27 @@ var PlanesToReap  = 0;
 var SelectedPlane = null;
 var SpecialSquawk = false;
 
+var Range = [];
+var maxRange = 0;
+var maxPlaneDetails = "";
+var avgRange = 0;
+
 var iSortCol=-1;
 var bSortASC=true;
 var bDefaultSortASC=true;
 var iDefaultSortCol=3;
+
+var flightPath = new google.maps.Polygon({
+	//path: rangeLineCoordinates,
+	geodesic: true,
+	strokeColor: '#0000FF',
+	strokeOpacity: 0.8,
+	strokeWeight: 2,
+	fillColor: '#0000FF',
+	fillOpacity: 0.2
+});
+
+
 
 // Get current map settings
 CenterLat = Number(localStorage['CenterLat']) || CONST_CENTERLAT;
@@ -47,6 +64,9 @@ function fetchData() {
 			
 			// Copy the plane into Planes
 			Planes[plane.icao] = plane;
+
+
+
 		}
 
 		PlanesOnTable = data.length;
@@ -55,6 +75,13 @@ function fetchData() {
 
 // Initalizes the map and starts up our timers to call various functions
 function initialize() {
+
+	// Initialise range array
+	for(i=0;i<360;i++){
+		Range[i] = 0.1;
+        }
+
+
 	// Make a list of all the available map IDs
 	var mapTypeIds = [];
 	for(var type in google.maps.MapTypeId) {
@@ -134,7 +161,7 @@ function initialize() {
 	var mapOptions = {
 		center: new google.maps.LatLng(CenterLat, CenterLon),
 		zoom: ZoomLvl,
-		mapTypeId: google.maps.MapTypeId.ROADMAP,
+		mapTypeId: google.maps.MapTypeId.TERRAIN,
 		mapTypeControl: true,
 		streetViewControl: false,
 		mapTypeControlOptions: {
@@ -190,6 +217,34 @@ function initialize() {
             }
         }
 	}
+
+
+//********************************************************************************************************************
+/*
+  if(navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+      var pos = new google.maps.LatLng(position.coords.latitude,
+                                       position.coords.longitude);
+
+    var marker = new google.maps.Marker({
+        position: pos,
+        map: GoogleMap,
+        title: 'Current Position'
+    });
+
+
+      GoogleMap.setCenter(pos);
+//      }, function() {
+//      handleNoGeolocation(true);
+    });
+  } 
+
+*/
+//********************************************************************************************************************
+
+
+
+	flightPath.setMap(GoogleMap);
 	
 	// These will run after page is complitely loaded
 	$(window).load(function() {
@@ -208,6 +263,7 @@ function initialize() {
 		refreshTableInfo();
 		refreshSelected();
 		reaper();
+		updateRange();
 		extendedPulse();
 	}, 1000);
 }
@@ -325,15 +381,16 @@ function refreshSelected() {
             var siteLatLon  = new google.maps.LatLng(SiteLat, SiteLon);
             var planeLatLon = new google.maps.LatLng(selected.latitude, selected.longitude);
             var dist = google.maps.geometry.spherical.computeDistanceBetween (siteLatLon, planeLatLon);
-            
+	    var radial = google.maps.geometry.spherical.computeHeading (siteLatLon, planeLatLon);            
             if (Metric) {
                 dist /= 1000;
             } else {
                 dist /= 1852;
             }
             dist = (Math.round((dist)*10)/10).toFixed(1);
+            radial = (Math.round(radial)).toFixed(1);
             html += '<tr><td colspan="' + columns + '" align="center">Distance from Site: ' + dist +
-                (Metric ? ' km' : ' NM') + '</td></tr>';
+                (Metric ? ' km' : ' NM') + ' :: Radial:'+ radial+ '</td></tr>';
         } // End of SiteShow
 	} else {
 	    if (SiteShow) {
@@ -347,6 +404,7 @@ function refreshSelected() {
 	html += '</table>';
 	
 	document.getElementById('plane_detail').innerHTML = html;
+	if(!selected) document.getElementById('plane_detail').innerHTML = maxPlaneDetails;
 }
 
 // Right now we have no means to validate the speed is good
@@ -392,6 +450,100 @@ function normalizeTrack(track, valid){
 	}
 	return x
 }
+
+function updateRange(){
+	//console.log("***** Range table print *****");
+       	var siteLatLon  = new google.maps.LatLng(SiteLat, SiteLon);
+        var rangeChange = false;
+
+	for (var tablep in Planes) {
+		var tableplane = Planes[tablep]
+			
+
+		// Update Range table
+            	var planeLatLon = new google.maps.LatLng(tableplane.latitude, tableplane.longitude);
+            	var dist = google.maps.geometry.spherical.computeDistanceBetween (siteLatLon, planeLatLon);
+	    	var radial = google.maps.geometry.spherical.computeHeading (siteLatLon, planeLatLon);            
+            	if (Metric) {
+                	dist /= 1000;
+            	} else {
+                	dist /= 1852;
+            	}
+            	dist = (Math.round((dist)*10)/10).toFixed(1);
+            	radial = (Math.round(radial)) //.toFixed(1);
+
+		if (tableplane.vPosition == true) {
+		
+
+			if(radial<0)
+			{
+				 radial360 = 360 + radial;
+			} else {
+				radial360 = radial;
+			}
+			console.log(tableplane.icao + " - Range -> " + dist +"@"+radial360+" ---> current Range: "+Range[radial360]+"@"+radial360);
+
+			if((dist - Range[radial360]) > 0) {
+				Range[radial360] = dist;
+				console.log(tableplane.icao+" - Udpated range table radial360 "+ radial360 + " to Range " + Range[radial360]+" : "+planeLatLon);
+				rangeChange = true;
+			}else{
+				console.log(tableplane.icao + " No update - Range -> " + dist +"@"+radial360+" ---> current Range: "+Range[radial360]+"@"+radial360);
+
+			}
+
+			if((dist - maxRange) > 0){
+				maxRange = dist;
+				maxPlaneDetails = "Max Range Plane : Range"+dist+"@"+radial360+" Alt:"+tableplane.altitude +" - Flight:"+tableplane.icao+":"+
+				tableplane.flight+" LatLon:"+tableplane.longitude+":"+tableplane.latitude+"  "+Date() +" Position valid:"+tableplane.vPosition+
+				" avgRange:"+avgRange;
+			}
+		}
+	}
+	if(rangeChange && ShowRange) drawRangeLine();
+	//drawRangeLine();
+	tableplane = null;
+}
+
+
+function drawRangeLine(){
+
+       	var siteLatLon  = new google.maps.LatLng(SiteLat, SiteLon);
+	var rangeLineCoordinates = [];
+	for(var i=0; i<360;i++){
+		
+		var radial = i;
+		var dist = 0;
+		if( radial > 180) radial = radial-360;
+            	if (Metric) {
+                	dist = 1000 * Range[i];
+            	} else {
+                	dist = 1852 * Range[i];
+            	}
+		//dist = Range[i];
+
+		rangeMarker = new google.maps.geometry.spherical.computeOffset(siteLatLon,dist,radial);
+		//rangeMarker = new google.maps.geometry.spherical.computeOffset(siteLatLon,10000,radial);
+		//if(dist>0) console.log(" Radial: "+radial+"  Dist:"+dist+ "  LatLon:"+rangeMarker);
+		rangeLineCoordinates.push(rangeMarker);
+	}
+	
+	//console.log("Drawing rage line"+ rangeLineCoordinates);
+	//console.log("***************Range[]********************"+Range);
+
+ 	if(flightPath){
+		//console.log("flightpath exists");
+		flightPath.setOptions({
+			path: rangeLineCoordinates
+		});
+	}else{
+		console.log("ERROR.... flightPath not defined...");
+	}
+
+	rangLineCoordinates = null;
+	siteLatLon = null;
+}
+
 
 // Refeshes the larger table of all the planes
 function refreshTableInfo() {
@@ -512,6 +664,7 @@ function refreshTableInfo() {
 	});
 
 	sortTable("tableinfo");
+	tableplane = null;
 }
 
 // Credit goes to a co-worker that needed a similar functions for something else

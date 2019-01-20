@@ -13,5 +13,14 @@ function optionsInitalize() {
 }
 
 function optionsModal() {
-	$( "#dialog-modal" ).dialog( "open");
+	//$( "#dialog-modal" ).dialog( "open");
+    	if (confirm("Show antenna Range area?") == true) {
+        	ShowRange = true;
+		flightPath.setMap(GoogleMap);
+    	} else {
+        	ShowRange = false;;
+		flightPath.setMap(null);
+    	}
+    //document.getElementById("demo").innerHTML = x;
+
 }

@@ -1,4 +1,6 @@
 var planeObject = {
+	keepTracks      : true,
+
 	oldlat		: null,
 	oldlon		: null,
 	oldalt		: null,
@@ -35,6 +37,18 @@ var planeObject = {
 	updated		: null,
 	reapable	: false,
 
+        // Returns the color depending on Altitude
+        // Graded Red for low to Blue for high
+        funcAltColor : function(altitude) {
+                        maxAlt = 46000;
+                        var alt = new Number(altitude);
+                        if (alt > maxAlt) alt = maxAlt;
+                        var altColorBlue = new Number(alt*254/maxAlt);
+                        var altColorRed = new Number(255-altColorBlue);
+                        return  "rgb(" +altColorRed.toFixed()+ ",50," + altColorBlue.toFixed()+ ")";
+
+                },
+
 	// Appends data to the running track so we can get a visual tail on the plane
 	// Only useful for a long running browser session.
 	funcAddToTrack	: function(){
@@ -53,11 +67,12 @@ var planeObject = {
 
 	// Should create an icon for us to use on the map...
 	funcGetIcon	: function() {
-			this.markerColor = MarkerColor;
+			//this.markerColor = MarkerColor;
+			this.markerColor = this.funcAltColor(this.altitude);
 			// If this marker is selected we should make it lighter than the rest.
-			if (this.is_selected == true) {
-				this.markerColor = SelectedColor;
-			}
+			//if (this.is_selected == true) {
+			//	this.markerColor = SelectedColor;
+			//}
 
 			// If we have not seen a recent update, change color
 			if (this.seen > 15) {
@@ -114,7 +129,7 @@ var planeObject = {
 			// just keep on trucking.  :)
 
 			return {
-                strokeWeight: (this.is_selected ? 2 : 1),
+                strokeWeight: (this.is_selected ? 3 : 1),
                 path:  "M 0,0 "+ baseSvg["planeData"],
                 scale: 0.4,
                 fillColor: this.markerColor,
@@ -150,9 +165,10 @@ var planeObject = {
 			this.seen	= data.seen;
 
 			// If no packet in over 58 seconds, consider the plane reapable
-			// This way we can hold it, but not show it just in case the plane comes back
+			// This way we can hold it, but not show it just in case the plane comes back  
 			if (this.seen > 58) {
 				this.reapable = true;
+
 				if (this.marker) {
 					this.marker.setMap(null);
 					this.marker = null;
@@ -194,6 +210,7 @@ var planeObject = {
 				if ((changeLat == true) || (changeLon == true)) {
 					this.funcAddToTrack();
 					if (this.is_selected) {
+					//if (true) {
 						this.line = this.funcUpdateLines();
 					}
 				}
@@ -232,12 +249,13 @@ var planeObject = {
 
 			// Setting the marker title
 			if (this.flight.length == 0) {
-				this.marker.setTitle(this.hex);
+				this.marker.setTitle(this.hex + ' '+this.altitude + 'ft');
 			} else {
-				this.marker.setTitle(this.flight+' ('+this.icao+')');
+				this.marker.setTitle(this.flight +this.altitude + 'ft');
 			}
 			return this.marker;
 		},
+
 
 	// Update our planes tail line,
 	// TODO: Make this multi colored based on options
@@ -245,10 +263,11 @@ var planeObject = {
 	funcUpdateLines: function() {
 			if (this.line) {
 				var path = this.line.getPath();
+				path.setOptions({strokeColor: this.funcAltColor(this.altitude)});
 				path.push(new google.maps.LatLng(this.latitude, this.longitude));
 			} else {
 				this.line = new google.maps.Polyline({
-					strokeColor: '#000000',
+					strokeColor: this.funcAltColor(this.altitude),
 					strokeOpacity: 1.0,
 					strokeWeight: 3,
 					map: GoogleMap,
